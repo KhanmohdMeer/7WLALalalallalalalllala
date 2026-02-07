@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ================================ */
   const TEST_MODE = true; // 🔴 set FALSE before final release
 
-  const START_MONTH = 1; // Feb (0 = Jan)
+  const START_MONTH = 1; // February (0 = Jan)
   const START_DAY = 7;
   const END_DAY = 14;
 
@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const prevBtn     = document.getElementById("prevBtn");
   const nextBtn     = document.getElementById("nextBtn");
 
-  // 🔴 HARD HIDE content until state is ready
+  // Hard block rendering until ready
   if (mainContent) mainContent.style.display = "none";
 
   const intro = document.getElementById("introScreen");
@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   function spawnFloatingItem() {
-    if (lockScreen && lockScreen.style.display !== "none") return;
+    if (lockScreen.style.display !== "none") return;
 
     const dayClass = [...document.body.classList].find(c => c.startsWith("day-"));
     if (!dayClass) return;
@@ -54,7 +54,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const el = document.createElement("div");
     el.className = "floating-item";
     el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-
     el.style.left = Math.random() * 100 + "vw";
     el.style.fontSize = 14 + Math.random() * 18 + "px";
     el.style.animationDuration = 8 + Math.random() * 6 + "s";
@@ -66,31 +65,20 @@ document.addEventListener("DOMContentLoaded", () => {
   setInterval(spawnFloatingItem, 1400);
 
   /* ===============================
-     DATE HELPERS
+     DATE / UNLOCK LOGIC (TIMEZONE SAFE)
   ================================ */
-  function today() {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-  }
-
-  function eventDate(day) {
-    const now = new Date();
-    return new Date(now.getFullYear(), START_MONTH, day, 0, 0, 0);
-  }
-
-  const daysBetween = (a, b) => Math.floor((b - a) / 86400000);
-
   function getUnlockedIndex() {
-    if (TEST_MODE) return 0; // 🌹 Rose Day
+    if (TEST_MODE) return 0; // Rose Day only
 
-    const now = today();
-    const start = eventDate(START_DAY);
-    const end = eventDate(END_DAY);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const start = new Date(now.getFullYear(), START_MONTH, START_DAY);
+    const end   = new Date(now.getFullYear(), START_MONTH, END_DAY);
 
-    if (now < start) return -1;
-    if (now > end) return DAYS.length - 1;
+    if (today < start) return -1;
+    if (today > end) return DAYS.length - 1;
 
-    return Math.min(DAYS.length - 1, Math.max(0, daysBetween(start, now)));
+    return Math.floor((today - start) / 86400000);
   }
 
   /* ===============================
@@ -129,7 +117,6 @@ you are seen and appreciated 💖`;
 
     let i = 0;
     textEl.textContent = "";
-
     setTimeout(function type() {
       if (i < LETTER_TEXT.length) {
         textEl.textContent += LETTER_TEXT.charAt(i++);
@@ -145,14 +132,13 @@ you are seen and appreciated 💖`;
     screens.forEach(s => s.classList.remove("active"));
     screens[index].classList.add("active");
 
-    currentIndex = index;
+    document.body.className = document.body.className
+      .split(" ")
+      .filter(c => !c.startsWith("day-"))
+      .join(" ");
 
-    // 🔴 remove only day-* classes
-    document.body.classList.forEach(c => {
-      if (c.startsWith("day-")) document.body.classList.remove(c);
-    });
     document.body.classList.add("day-" + DAYS[index]);
-
+    currentIndex = index;
     handleLetter(index);
   }
 
@@ -161,46 +147,39 @@ you are seen and appreciated 💖`;
     nextBtn?.classList.toggle("disabled", currentIndex >= unlocked);
   }
 
+  /* ===============================
+     MAIN UI FLOW
+  ================================ */
   function updateUI() {
-  const unlocked = getUnlockedIndex();
+    const unlocked = getUnlockedIndex();
 
-  // 🔒 Still locked
-  if (unlocked < 0) {
-    lockScreen.style.display = "flex";
-    mainContent.style.display = "none";
-    updateCountdown();
-    return;
+    if (unlocked < 0) {
+      lockScreen.style.display = "flex";
+      mainContent.style.display = "none";
+      updateCountdown();
+      return;
+    }
+
+    lockScreen.style.display = "none";
+    document.body.classList.remove("locked");
+
+    showScreen(unlocked);
+    updateNav(unlocked);
+    mainContent.style.display = "block";
   }
 
-  // 🔓 Unlock sequence (ORDER IS CRITICAL)
-  lockScreen.style.display = "none";
-  document.body.classList.remove("locked");
-
-  // 1️⃣ Decide screen FIRST
-  currentIndex = unlocked;
-  showScreen(currentIndex);
-  updateNav(unlocked);
-
-  // 2️⃣ THEN allow rendering
-  mainContent.style.display = "block";
-}
-
   function updateCountdown() {
-    if (!countdown) return;
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const start = new Date(now.getFullYear(), START_MONTH, START_DAY);
 
-    const target = eventDate(START_DAY);
-    const diff = target - today();
-
-    if (diff <= 0) {
+    if (today >= start) {
       countdown.textContent = "Unlocked 🤍";
       return;
     }
 
-    const d = Math.floor(diff / 86400000);
-    const h = Math.floor((diff / 3600000) % 24);
-    const m = Math.floor((diff / 60000) % 60);
-
-    countdown.textContent = `${d}d ${h}h ${m}m`;
+    const diff = Math.floor((start - today) / 86400000);
+    countdown.textContent = `${diff} day(s) to go`;
   }
 
   /* ===============================
