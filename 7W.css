@@ -1,0 +1,223 @@
+/* ===============================
+   RESET
+================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ===============================
+   BODY (FIXED)
+================================ */
+body {
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: relative;
+}
+
+/* Hide content while locked */
+body.locked #mainContent {
+  visibility: hidden;
+}
+
+/* ===============================
+   LOCK SCREEN
+================================ */
+#lockScreen {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #ffb6c1, #f07be0);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  text-align: center;
+}
+
+.countdown {
+  margin-top: 16px;
+  font-size: 1.2rem;
+}
+
+/* ===============================
+   INTRO SCREEN
+================================ */
+.intro-screen {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #ffd1dc, #f8a5c2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9;
+}
+
+.intro-box {
+  text-align: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  color: #4a0033;
+}
+
+/* ===============================
+   MAIN CONTENT
+================================ */
+#mainContent {
+  position: relative;
+  z-index: 2;
+}
+
+/* ===============================
+   SCREENS
+================================ */
+.screen {
+  display: none;
+  min-height: 100vh;
+  padding: 40px 20px 120px;
+  text-align: center;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  overflow-y: auto;
+}
+
+.screen.active {
+  display: flex;
+}
+
+/* ===============================
+   TEXT
+================================ */
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.3rem;
+  margin-bottom: 12px;
+}
+
+p {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1rem;
+  line-height: 1.9;
+  opacity: 0.95;
+}
+
+/* ===============================
+   IMAGES
+================================ */
+.day-img {
+  width: 240px;
+  max-width: 85vw;
+  border-radius: 16px;
+  margin-bottom: 16px;
+}
+
+.day-gif {
+  width: 140px;
+  margin-top: 14px;
+}
+
+/* ===============================
+   NAVIGATION
+================================ */
+.nav {
+  position: fixed;
+  bottom: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 5;
+}
+
+.nav button {
+  background: rgba(255,255,255,0.9);
+  border: none;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+.nav button.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ===============================
+   DAY MOODS
+================================ */
+body.day-rose      { background: linear-gradient(135deg, #ffdde1, #ee9ca7); }
+body.day-propose   { background: linear-gradient(135deg, #fceabb, #f8b500); }
+body.day-chocolate { background: linear-gradient(135deg, #d7ccc8, #8d6e63); }
+body.day-teddy     { background: linear-gradient(135deg, #f5e6d3, #e3caa5); }
+body.day-promise   { background: linear-gradient(135deg, #dbeafe, #93c5fd); }
+body.day-hug       { background: linear-gradient(135deg, #ffe5d9, #ffb4a2); }
+body.day-kiss      { background: linear-gradient(135deg, #fbcfe8, #db2777); }
+
+/* ===============================
+   FLOATING OBJECTS
+================================ */
+.floating-item {
+  position: fixed;
+  top: -40px;
+  pointer-events: none;
+  z-index: 1;
+  animation-name: floatDown;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+  opacity: 0.85;
+}
+
+@keyframes floatDown {
+  to {
+    transform: translateY(120vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* ===============================
+   SECRET LETTER (MOBILE SAFE)
+================================ */
+.secret-letter {
+  margin: 40px auto;
+  max-width: 720px;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+.secret-letter.open {
+  opacity: 1;
+}
+
+/* Paper */
+.paper-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url("assets/paper.jpg");
+  background-size: cover;
+  background-position: top center;
+  background-repeat: no-repeat;
+  z-index: 0;
+}
+
+/* Text */
+.letter-content {
+  position: relative;
+  z-index: 1;
+  padding: 100px 40px 120px;
+}
+
+.letter-content p {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.2rem;
+  line-height: 2;
+  color: #3b2f2f;
+  white-space: pre-line;
+}

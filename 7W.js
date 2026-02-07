@@ -1,0 +1,213 @@
+document.addEventListener("DOMContentLoaded", () => {
+
+  /* ===============================
+     CONFIG
+  ================================ */
+  const TEST_MODE = true; // 🔴 set FALSE before final release
+
+  const START_MONTH = 1; // Feb (0 = Jan)
+  const START_DAY = 7;
+  const END_DAY = 14;
+
+  const DAYS = ["rose","propose","chocolate","teddy","promise","hug","kiss"];
+  let currentIndex = 0;
+  let letterStarted = false;
+
+  /* ===============================
+     DOM
+  ================================ */
+  const lockScreen   = document.getElementById("lockScreen");
+  const mainContent  = document.getElementById("mainContent");
+  const countdown    = document.getElementById("countdown");
+  const screens      = document.querySelectorAll("#mainContent .screen");
+  const prevBtn      = document.getElementById("prevBtn");
+  const nextBtn      = document.getElementById("nextBtn");
+
+  const intro = document.getElementById("introScreen");
+  if (intro) {
+    setTimeout(() => intro.style.display = "none", 4500);
+  }
+
+  /* ===============================
+     FLOATING ITEMS
+  ================================ */
+  const FLOAT_SETS = {
+    rose: ["🌹","❤️"],
+    propose: ["💍","❤️"],
+    chocolate: ["🍫"],
+    teddy: ["🧸","🤍"],
+    promise: ["🤝","✨"],
+    hug: ["🤗","🤍"],
+    kiss: ["😘","💖"]
+  };
+
+  function spawnFloatingItem() {
+    if (lockScreen.style.display !== "none") return;
+
+    const dayClass = [...document.body.classList].find(c => c.startsWith("day-"));
+    if (!dayClass) return;
+
+    const key = dayClass.replace("day-","");
+    const symbols = FLOAT_SETS[key] || ["❤️"];
+
+    const el = document.createElement("div");
+    el.className = "floating-item";
+    el.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+
+    el.style.left = Math.random()*100 + "vw";
+    el.style.fontSize = 14 + Math.random()*18 + "px";
+    el.style.animationDuration = 8 + Math.random()*6 + "s";
+
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 15000);
+  }
+
+  setInterval(spawnFloatingItem, 1400);
+
+  /* ===============================
+     DATE HELPERS (FIXED FOR MOBILE)
+  ================================ */
+  function today() {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+  }
+
+  function eventDate(day) {
+    const now = new Date();
+    return new Date(now.getFullYear(), START_MONTH, day, 0, 0, 0);
+  }
+
+  const daysBetween = (a,b) => Math.floor((b - a) / 86400000);
+
+  function getUnlockedIndex() {
+    if (TEST_MODE) return 0; // 🌹 Rose Day forced
+
+    const now = today();
+    const start = eventDate(START_DAY);
+    const end = eventDate(END_DAY);
+
+    if (now < start) return -1;
+    if (now > end) return DAYS.length - 1;
+
+    return Math.min(DAYS.length - 1, Math.max(0, daysBetween(start, now)));
+  }
+
+  /* ===============================
+     LETTER (PROPOSE DAY)
+  ================================ */
+  const LETTER_TEXT = `Hey Sunshine 💖🌹
+
+I don’t usually write things like this.
+Some feelings deserve time.
+
+Somewhere along the way,
+you started to matter to me quietly.
+
+This letter isn’t meant to change anything.
+Just honesty, softly written.
+
+You don’t owe me anything.
+I just wanted you to know —
+you are seen and appreciated 💖`;
+
+  function handleLetter(index) {
+    const paper = document.querySelector(".secret-letter");
+    const textEl = document.getElementById("letterText");
+    if (!paper || !textEl) return;
+
+    if (index !== 1) {
+      paper.classList.remove("open");
+      textEl.textContent = "";
+      letterStarted = false;
+      return;
+    }
+
+    if (letterStarted) return;
+    letterStarted = true;
+    paper.classList.add("open");
+
+    let i = 0;
+    textEl.textContent = "";
+
+    setTimeout(function type() {
+      if (i < LETTER_TEXT.length) {
+        textEl.textContent += LETTER_TEXT.charAt(i++);
+        setTimeout(type, 45);
+      }
+    }, 2000);
+  }
+
+  /* ===============================
+     SCREEN CONTROL
+  ================================ */
+  function showScreen(index) {
+    screens.forEach(s => s.classList.remove("active"));
+    screens[index].classList.add("active");
+
+    currentIndex = index;
+
+    document.body.className = "";
+    document.body.classList.add("day-" + DAYS[index]);
+
+    handleLetter(index);
+  }
+
+  function updateNav(unlocked) {
+    prevBtn.classList.toggle("disabled", currentIndex === 0);
+    nextBtn.classList.toggle("disabled", currentIndex >= unlocked);
+  }
+
+  function updateUI() {
+    const unlocked = getUnlockedIndex();
+
+    if (unlocked < 0) {
+      lockScreen.style.display = "flex";
+      mainContent.style.display = "none";
+      updateCountdown();
+      return;
+    }
+
+    // 🔑 UNLOCK
+    lockScreen.style.display = "none";
+    mainContent.style.display = "block";
+    document.body.classList.remove("locked"); // 🔴 CRITICAL FIX
+
+    currentIndex = unlocked;
+    showScreen(currentIndex);
+    updateNav(unlocked);
+  }
+
+  function updateCountdown() {
+    const target = eventDate(START_DAY);
+    const diff = target - today();
+
+    if (diff <= 0) {
+      countdown.textContent = "Unlocked 🤍";
+      return;
+    }
+
+    const d = Math.floor(diff/86400000);
+    const h = Math.floor((diff/3600000)%24);
+    const m = Math.floor((diff/60000)%60);
+
+    countdown.textContent = `${d}d ${h}h ${m}m`;
+  }
+
+  /* ===============================
+     NAV
+  ================================ */
+  nextBtn?.addEventListener("click", () => {
+    if (currentIndex < getUnlockedIndex()) showScreen(currentIndex + 1);
+    updateNav(getUnlockedIndex());
+  });
+
+  prevBtn?.addEventListener("click", () => {
+    if (currentIndex > 0) showScreen(currentIndex - 1);
+    updateNav(getUnlockedIndex());
+  });
+
+  /* ===============================
+     INIT
+  ================================ */
+  updateUI();
+});
