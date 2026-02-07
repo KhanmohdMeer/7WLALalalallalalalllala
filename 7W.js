@@ -162,25 +162,28 @@ you are seen and appreciated 💖`;
   }
 
   function updateUI() {
-    const unlocked = getUnlockedIndex();
+  const unlocked = getUnlockedIndex();
 
-    if (unlocked < 0) {
-      lockScreen.style.display = "flex";
-      if (mainContent) mainContent.style.display = "none";
-      updateCountdown();
-      return;
-    }
-
-    // 🔓 UNLOCK (ORDER MATTERS)
-    lockScreen.style.display = "none";
-    document.body.classList.remove("locked");
-
-    currentIndex = unlocked;
-    showScreen(currentIndex);
-    updateNav(unlocked);
-
-    if (mainContent) mainContent.style.display = "block";
+  // 🔒 Still locked
+  if (unlocked < 0) {
+    lockScreen.style.display = "flex";
+    mainContent.style.display = "none";
+    updateCountdown();
+    return;
   }
+
+  // 🔓 Unlock sequence (ORDER IS CRITICAL)
+  lockScreen.style.display = "none";
+  document.body.classList.remove("locked");
+
+  // 1️⃣ Decide screen FIRST
+  currentIndex = unlocked;
+  showScreen(currentIndex);
+  updateNav(unlocked);
+
+  // 2️⃣ THEN allow rendering
+  mainContent.style.display = "block";
+}
 
   function updateCountdown() {
     if (!countdown) return;
