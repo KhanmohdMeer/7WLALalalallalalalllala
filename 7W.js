@@ -16,17 +16,18 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ===============================
      DOM
   ================================ */
-  const lockScreen   = document.getElementById("lockScreen");
-  const mainContent  = document.getElementById("mainContent");
-  const countdown    = document.getElementById("countdown");
-  const screens      = document.querySelectorAll("#mainContent .screen");
-  const prevBtn      = document.getElementById("prevBtn");
-  const nextBtn      = document.getElementById("nextBtn");
+  const lockScreen  = document.getElementById("lockScreen");
+  const mainContent = document.getElementById("mainContent");
+  const countdown   = document.getElementById("countdown");
+  const screens     = document.querySelectorAll("#mainContent .screen");
+  const prevBtn     = document.getElementById("prevBtn");
+  const nextBtn     = document.getElementById("nextBtn");
+
+  // 🔴 HARD HIDE content until state is ready
+  if (mainContent) mainContent.style.display = "none";
 
   const intro = document.getElementById("introScreen");
-  if (intro) {
-    setTimeout(() => intro.style.display = "none", 4500);
-  }
+  if (intro) setTimeout(() => intro.style.display = "none", 4500);
 
   /* ===============================
      FLOATING ITEMS
@@ -42,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   function spawnFloatingItem() {
-    if (lockScreen.style.display !== "none") return;
+    if (lockScreen && lockScreen.style.display !== "none") return;
 
     const dayClass = [...document.body.classList].find(c => c.startsWith("day-"));
     if (!dayClass) return;
@@ -52,11 +53,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const el = document.createElement("div");
     el.className = "floating-item";
-    el.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+    el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
 
-    el.style.left = Math.random()*100 + "vw";
-    el.style.fontSize = 14 + Math.random()*18 + "px";
-    el.style.animationDuration = 8 + Math.random()*6 + "s";
+    el.style.left = Math.random() * 100 + "vw";
+    el.style.fontSize = 14 + Math.random() * 18 + "px";
+    el.style.animationDuration = 8 + Math.random() * 6 + "s";
 
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 15000);
@@ -65,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setInterval(spawnFloatingItem, 1400);
 
   /* ===============================
-     DATE HELPERS (FIXED FOR MOBILE)
+     DATE HELPERS
   ================================ */
   function today() {
     const now = new Date();
@@ -77,10 +78,10 @@ document.addEventListener("DOMContentLoaded", () => {
     return new Date(now.getFullYear(), START_MONTH, day, 0, 0, 0);
   }
 
-  const daysBetween = (a,b) => Math.floor((b - a) / 86400000);
+  const daysBetween = (a, b) => Math.floor((b - a) / 86400000);
 
   function getUnlockedIndex() {
-    if (TEST_MODE) return 0; // 🌹 Rose Day forced
+    if (TEST_MODE) return 0; // 🌹 Rose Day
 
     const now = today();
     const start = eventDate(START_DAY);
@@ -146,15 +147,18 @@ you are seen and appreciated 💖`;
 
     currentIndex = index;
 
-    document.body.className = "";
+    // 🔴 remove only day-* classes
+    document.body.classList.forEach(c => {
+      if (c.startsWith("day-")) document.body.classList.remove(c);
+    });
     document.body.classList.add("day-" + DAYS[index]);
 
     handleLetter(index);
   }
 
   function updateNav(unlocked) {
-    prevBtn.classList.toggle("disabled", currentIndex === 0);
-    nextBtn.classList.toggle("disabled", currentIndex >= unlocked);
+    prevBtn?.classList.toggle("disabled", currentIndex === 0);
+    nextBtn?.classList.toggle("disabled", currentIndex >= unlocked);
   }
 
   function updateUI() {
@@ -162,22 +166,25 @@ you are seen and appreciated 💖`;
 
     if (unlocked < 0) {
       lockScreen.style.display = "flex";
-      mainContent.style.display = "none";
+      if (mainContent) mainContent.style.display = "none";
       updateCountdown();
       return;
     }
 
-    // 🔑 UNLOCK
+    // 🔓 UNLOCK (ORDER MATTERS)
     lockScreen.style.display = "none";
-    mainContent.style.display = "block";
-    document.body.classList.remove("locked"); // 🔴 CRITICAL FIX
+    document.body.classList.remove("locked");
 
     currentIndex = unlocked;
     showScreen(currentIndex);
     updateNav(unlocked);
+
+    if (mainContent) mainContent.style.display = "block";
   }
 
   function updateCountdown() {
+    if (!countdown) return;
+
     const target = eventDate(START_DAY);
     const diff = target - today();
 
@@ -186,9 +193,9 @@ you are seen and appreciated 💖`;
       return;
     }
 
-    const d = Math.floor(diff/86400000);
-    const h = Math.floor((diff/3600000)%24);
-    const m = Math.floor((diff/60000)%60);
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff / 3600000) % 24);
+    const m = Math.floor((diff / 60000) % 60);
 
     countdown.textContent = `${d}d ${h}h ${m}m`;
   }

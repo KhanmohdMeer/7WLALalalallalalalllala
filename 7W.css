@@ -8,7 +8,7 @@
 }
 
 /* ===============================
-   BODY (FIXED)
+   BODY
 ================================ */
 body {
   font-family: 'Inter', sans-serif;
@@ -16,11 +16,6 @@ body {
   overflow-x: hidden;
   overflow-y: auto;
   position: relative;
-}
-
-/* Hide content while locked */
-body.locked #mainContent {
-  visibility: hidden;
 }
 
 /* ===============================
@@ -72,10 +67,10 @@ body.locked #mainContent {
 }
 
 /* ===============================
-   SCREENS
+   SCREENS (CRITICAL FIX)
 ================================ */
 .screen {
-  display: none !important;   /* 🔴 force hide */
+  display: none;
   min-height: 100vh;
   padding: 40px 20px 120px;
   text-align: center;
@@ -84,7 +79,7 @@ body.locked #mainContent {
 }
 
 .screen.active {
-  display: flex !important;
+  display: flex;
 }
 
 /* ===============================
@@ -179,9 +174,10 @@ body.day-kiss      { background: linear-gradient(135deg, #fbcfe8, #db2777); }
 }
 
 /* ===============================
-   SECRET LETTER (MOBILE SAFE)
+   SECRET LETTER (FIXED)
 ================================ */
 .secret-letter {
+  position: relative;   /* 🔴 IMPORTANT */
   margin: 40px auto;
   max-width: 720px;
   opacity: 0;
@@ -192,7 +188,6 @@ body.day-kiss      { background: linear-gradient(135deg, #fbcfe8, #db2777); }
   opacity: 1;
 }
 
-/* Paper */
 .paper-bg {
   position: absolute;
   inset: 0;
@@ -203,7 +198,6 @@ body.day-kiss      { background: linear-gradient(135deg, #fbcfe8, #db2777); }
   z-index: 0;
 }
 
-/* Text */
 .letter-content {
   position: relative;
   z-index: 1;
