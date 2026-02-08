@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ===============================
      CONFIG
   ================================ */
-  const TEST_MODE = true; // 🔴 set FALSE before final release
+  const TEST_MODE = false; // 🔴 set FALSE before final release
 
   const START_MONTH = 1; // February (0 = Jan)
   const START_DAY = 7;
@@ -68,17 +68,25 @@ document.addEventListener("DOMContentLoaded", () => {
      DATE / UNLOCK LOGIC (TIMEZONE SAFE)
   ================================ */
   function getUnlockedIndex() {
-    if (TEST_MODE) return 0; // Rose Day only
+      if (TEST_MODE) return 1; // force Propose Day for testing
 
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const start = new Date(now.getFullYear(), START_MONTH, START_DAY);
-    const end   = new Date(now.getFullYear(), START_MONTH, END_DAY);
+        const now = new Date();
+          const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    if (today < start) return -1;
-    if (today > end) return DAYS.length - 1;
+            const start = new Date(now.getFullYear(), START_MONTH, START_DAY);
+              const end   = new Date(now.getFullYear(), START_MONTH, END_DAY);
 
-    return Math.floor((today - start) / 86400000);
+                // Before 7th → locked
+                  if (today < start) return -1;
+
+                    // After 14th → last day
+                      if (today > end) return DAYS.length - 1;
+
+                        // 🔑 CORE FIX (NO FLOOR BUG)
+                          const diffDays = Math.round((today - start) / 86400000);
+
+                            return Math.min(DAYS.length - 1, diffDays);
+                            }
   }
 
   /* ===============================
