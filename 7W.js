@@ -19,6 +19,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const screens     = document.querySelectorAll("#mainContent .screen");
   const prevBtn     = document.getElementById("prevBtn");
   const nextBtn     = document.getElementById("nextBtn");
+  const intro = document.getElementById("introScreen");
+if (intro) {
+  setTimeout(() => {
+    intro.remove(); // 🔥 completely remove it
+  }, 3000);
+}
+
 
   /* ===============================
      DATE LOGIC (BULLETPROOF)
